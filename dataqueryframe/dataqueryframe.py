@@ -35,66 +35,44 @@ class DataQueryFrame(pd.DataFrame):
         if missing_columns:
             raise ValueError(f"Columns not found in DataFrame: {missing_columns}")
 
-    def select_columns(self, columns: Union[str, List[str]]) -> "DataQueryFrame":
+    def select(self, columns: Optional[Union[str, List[str]]] = None) -> "DataQueryFrame":
         """
         Selects specified columns, similar to SQL SELECT statement.
 
         :param columns: A string or list of strings representing column names to select.
         :return: A DataQueryFrame with only the specified columns.
         """
-        if isinstance(columns, str):
-            columns = [columns]
-        self._ensure_columns_exist(columns)
-        code = f"self[{columns}]"
+        if columns == "*":
+            columns = None
+        if columns:
+            if isinstance(columns, str):
+                columns = [columns]
+            self._ensure_columns_exist(columns)
+            code = f"df[{columns}])"
+        else:
+            code = "df"
         self.print_code(code)
-        return self[columns].pipe(DataQueryFrame)
+        return (self[columns] if columns else self).pipe(DataQueryFrame)
 
-    def select_distinct(self, columns: Union[str, List[str]]) -> "DataQueryFrame":
+    def select_distinct(self, columns: Optional[Union[str, List[str]]] = None) -> "DataQueryFrame":
         """
         Selects distinct rows based on specified columns, similar to SQL SELECT DISTINCT.
 
         :param columns: A string or list of strings representing column names for distinct selection.
         :return: A DataQueryFrame with distinct rows based on specified columns.
         """
-        if isinstance(columns, str):
-            columns = [columns]
-        self._ensure_columns_exist(columns)
-        code = f"self.drop_duplicates(subset={columns})"
+        if columns == "*":
+            columns = None
+        if columns:
+            if isinstance(columns, str):
+                columns = [columns]
+            self._ensure_columns_exist(columns)
+            code = f"df.drop_duplicates(subset={columns})"
+        else:
+            code = "df.drop_duplicates()"
         self.print_code(code)
         return self.drop_duplicates(subset=columns).pipe(DataQueryFrame)
-
-
-    def where(self, column: str, operator: str, value: Any) -> "DataQueryFrame":
-        """
-        Applies a conditional filter to the DataFrame, similar to SQL WHERE clause.
-
-        :param column: The column name to apply the condition on.
-        :param operator: The operator for the condition (e.g., '=', '!=', 'LIKE').
-        :param value: The value to compare the column against.
-        :return: A DataQueryFrame filtered based on the condition.
-        """
-        if column not in self.columns:
-            raise ValueError(f"Column '{column}' does not exist in the DataFrame.")
-
-        if operator.lower() == "like":
-            # Sanitize input to avoid regex errors
-            value = re.escape(value)
-            # Replace '%' with '.*' for wildcard matching
-            value = value.replace("%", ".*")
-            condition = self[column].str.contains(value, case=False, na=False, regex=True)
-            code = f"self[self['{column}'].str.contains('{value}', case=False, na=False, regex=True)]"
-        elif operator == "=":
-            condition = self[column] == value
-            code = f"self[self['{column}'] == {value}]"
-        elif operator == "!=":
-            condition = self[column] != value
-            code = f"self[self['{column}'] != {value}]"
-        else:
-            raise ValueError(f"Unsupported operator '{operator}'.")
-
-        self.print_code(code)
-        return self.loc[condition].pipe(DataQueryFrame)
-
+    
     def select_count(
         self,
         group_by: Optional[Union[str, List[str]]] = None,
@@ -123,36 +101,71 @@ class DataQueryFrame(pd.DataFrame):
                 distinct_columns = [distinct_columns]
             distinct_count = len(self.select_distinct(distinct_columns))
             result = pd.DataFrame({"count": [distinct_count]})
-            code = f"len(self.select_distinct({distinct_columns}))"
+            code = f"len(df.select_distinct({distinct_columns}))"
         elif group_by is not None:
             if isinstance(group_by, str):
                 group_by = [group_by]
             self._ensure_columns_exist(group_by)
             result = self.groupby(group_by).size().reset_index(name="count")
-            code = f"self.groupby({group_by}).size().reset_index(name='count')"
+            code = f"df.groupby({group_by}).size().reset_index(name='count')"
         else:
             count_all = len(self)
             result = pd.DataFrame({"count": [count_all]})
-            code = "len(self)  # Count all rows"
+            code = "len(df)  # Count all rows"
 
         self.print_code(code)
         return result.pipe(DataQueryFrame)
 
+    def where(self, column: str, operator: str, value: Any) -> "DataQueryFrame":
+        """
+        Applies a conditional filter to the DataFrame, similar to SQL WHERE clause.
+
+        :param column: The column name to apply the condition on.
+        :param operator: The operator for the condition (e.g., '=', '!=', '<', '>', '<=', '>=', 'LIKE').
+        :param value: The value to compare the column against.
+        :return: A DataQueryFrame filtered based on the condition.
+        """
+        valid_operators = ["=", "!=", "<", ">", "<=", ">=", "LIKE"]
+        if operator not in valid_operators:
+            raise ValueError(
+                f"Invalid operator '{operator}'. Valid operators are: {valid_operators}"
+            )
+
+        if column not in self.columns:
+            raise ValueError(f"Column '{column}' does not exist in the DataFrame.")
+
+        if operator.lower() == "like":
+            # Sanitize input to avoid regex errors
+            value = re.escape(value)
+            # Replace '%' with '.*' for wildcard matching
+            value = value.replace("%", ".*")
+            condition = self[column].str.contains(value, case=False, na=False, regex=True)
+            code = f"df[df['{column}'].str.contains('{value}', case=False, na=False, regex=True)]"
+        elif operator == "=":
+            condition = self[column] == value
+            code = f"df[df['{column}'] == {value}]"
+        else:
+            condition = eval(f"self['{column}'] {operator} value")
+            code = f"df[df['{column}'] {operator} {value}]"
+
+        self.print_code(code)
+        return self.loc[condition].pipe(DataQueryFrame)
+
     def order_by(
-        self, by: Union[str, List[str]], ascending: bool = True
+        self, columns: Union[str, List[str]], ascending: bool = True
     ) -> "DataQueryFrame":
         """
         Sorts the DataFrame based on specified column(s), similar to SQL ORDER BY clause.
 
-        :param by: A string or list of strings representing column names to sort by.
+        :param columns: A string or list of strings representing column names to sort by.
         :param ascending: Optional; a boolean indicating the sort direction (True for ascending, False for descending).
         :return: A DataQueryFrame sorted based on specified criteria.
         """
-        if isinstance(by, str):
-            by = [by]
-        self._ensure_columns_exist(by)
-        sorted_df = self.sort_values(by=by, ascending=ascending)
-        code = f"self.sort_values(by={by}, ascending={ascending})"
+        if isinstance(columns, str):
+            columns = [columns]
+        self._ensure_columns_exist(columns)
+        sorted_df = self.sort_values(by=columns, ascending=ascending)
+        code = f"df.sort_values(by={columns}, ascending={ascending})"
         self.print_code(code)
         return sorted_df.pipe(DataQueryFrame)
 
@@ -185,7 +198,19 @@ class DataQueryFrame(pd.DataFrame):
             .reset_index(drop=True)
         )
 
-        code = "pd.concat([self, other], ignore_index=True).drop_duplicates().reset_index(drop=True)"
+        code = "pd.concat([df, other], ignore_index=True).drop_duplicates().reset_index(drop=True)"
         self.print_code(code)
 
         return result.pipe(DataQueryFrame)
+
+    def limit(self, n: int) -> "DataQueryFrame":
+        """
+        Limits the number of rows returned, similar to SQL LIMIT clause.
+
+        :param n: An integer representing the maximum number of rows to return.
+        :return: A DataQueryFrame limited to the specified number of rows.
+        """
+        limited_df = self.head(n)
+        code = f"df.head({n})"
+        self.print_code(code)
+        return limited_df.pipe(DataQueryFrame)
