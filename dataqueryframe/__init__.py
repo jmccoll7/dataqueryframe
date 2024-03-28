@@ -1,4 +1,4 @@
-"""Top-level package for SQLDataFrame."""
+"""Top-level package for DataQueryFrame."""
 
 __author__ = """James McColl"""
 __email__ = 'jmccoll71@gmail.com'

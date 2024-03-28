@@ -1,19 +1,19 @@
 ============
-SQLDataFrame
+DataQueryFrame
 ============
 
 
-.. image:: https://img.shields.io/pypi/v/sqldataframe.svg
-        :target: https://pypi.python.org/pypi/sqldataframe
+.. image:: https://img.shields.io/pypi/v/dataqueryframe.svg
+        :target: https://pypi.python.org/pypi/dataqueryframe
         
 
-.. image:: https://readthedocs.org/projects/sqldataframe/badge/?version=latest
-        :target: https://sqldataframe.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/dataqueryframe/badge/?version=latest
+        :target: https://dataqueryframe.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
 
-.. image:: https://pyup.io/repos/github/jmccoll7/sqldataframe/shield.svg
-     :target: https://pyup.io/repos/github/jmccoll7/sqldataframe/
+.. image:: https://pyup.io/repos/github/jmccoll7/dataqueryframe/shield.svg
+     :target: https://pyup.io/repos/github/jmccoll7/dataqueryframe/
      :alt: Updates
 
 
@@ -22,7 +22,7 @@ An enhanced DataFrame with SQL-like capabilities.
 
 
 * Free software: MIT license
-* Documentation: https://sqldataframe.readthedocs.io.
+* Documentation: https://dataqueryframe.readthedocs.io.
 
 
 Features

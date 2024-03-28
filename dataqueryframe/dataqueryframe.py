@@ -3,10 +3,10 @@ import re  # For sanitizing inputs for LIKE functionality
 from typing import Union, List, Optional, Any
 
 
-class SqlDataFrame(pd.DataFrame):
+class DataQueryFrame(pd.DataFrame):
     @property
     def _constructor(self):
-        return SqlDataFrame
+        return DataQueryFrame
 
     @staticmethod
     def print_code(code: str) -> None:
@@ -35,43 +35,43 @@ class SqlDataFrame(pd.DataFrame):
         if missing_columns:
             raise ValueError(f"Columns not found in DataFrame: {missing_columns}")
 
-    def select_columns(self, columns: Union[str, List[str]]) -> "SqlDataFrame":
+    def select_columns(self, columns: Union[str, List[str]]) -> "DataQueryFrame":
         """
         Selects specified columns, similar to SQL SELECT statement.
 
         :param columns: A string or list of strings representing column names to select.
-        :return: A SqlDataFrame with only the specified columns.
+        :return: A DataQueryFrame with only the specified columns.
         """
         if isinstance(columns, str):
             columns = [columns]
         self._ensure_columns_exist(columns)
         code = f"self[{columns}]"
         self.print_code(code)
-        return self[columns].pipe(SqlDataFrame)
+        return self[columns].pipe(DataQueryFrame)
 
-    def select_distinct(self, columns: Union[str, List[str]]) -> "SqlDataFrame":
+    def select_distinct(self, columns: Union[str, List[str]]) -> "DataQueryFrame":
         """
         Selects distinct rows based on specified columns, similar to SQL SELECT DISTINCT.
 
         :param columns: A string or list of strings representing column names for distinct selection.
-        :return: A SqlDataFrame with distinct rows based on specified columns.
+        :return: A DataQueryFrame with distinct rows based on specified columns.
         """
         if isinstance(columns, str):
             columns = [columns]
         self._ensure_columns_exist(columns)
         code = f"self.drop_duplicates(subset={columns})"
         self.print_code(code)
-        return self.drop_duplicates(subset=columns).pipe(SqlDataFrame)
+        return self.drop_duplicates(subset=columns).pipe(DataQueryFrame)
 
 
-    def where(self, column: str, operator: str, value: Any) -> "SqlDataFrame":
+    def where(self, column: str, operator: str, value: Any) -> "DataQueryFrame":
         """
         Applies a conditional filter to the DataFrame, similar to SQL WHERE clause.
 
         :param column: The column name to apply the condition on.
         :param operator: The operator for the condition (e.g., '=', '!=', 'LIKE').
         :param value: The value to compare the column against.
-        :return: A SqlDataFrame filtered based on the condition.
+        :return: A DataQueryFrame filtered based on the condition.
         """
         if column not in self.columns:
             raise ValueError(f"Column '{column}' does not exist in the DataFrame.")
@@ -93,21 +93,21 @@ class SqlDataFrame(pd.DataFrame):
             raise ValueError(f"Unsupported operator '{operator}'.")
 
         self.print_code(code)
-        return self.loc[condition].pipe(SqlDataFrame)
+        return self.loc[condition].pipe(DataQueryFrame)
 
     def select_count(
         self,
         group_by: Optional[Union[str, List[str]]] = None,
         distinct: bool = False,
         distinct_columns: Optional[Union[str, List[str]]] = None,
-    ) -> "SqlDataFrame":
+    ) -> "DataQueryFrame":
         """
         Counts rows with an option for grouping and distinct count, similar to SQL COUNT function.
 
         :param group_by: Optional; a string or list of strings representing column names to group by.
         :param distinct: Optional; a boolean indicating whether to count distinct rows.
         :param distinct_columns: Optional; applicable if distinct is True, specifies columns for distinct count.
-        :return: A SqlDataFrame with count results.
+        :return: A DataQueryFrame with count results.
         """
         if distinct and distinct_columns is None:
             raise ValueError(
@@ -136,17 +136,17 @@ class SqlDataFrame(pd.DataFrame):
             code = "len(self)  # Count all rows"
 
         self.print_code(code)
-        return result.pipe(SqlDataFrame)
+        return result.pipe(DataQueryFrame)
 
     def order_by(
         self, by: Union[str, List[str]], ascending: bool = True
-    ) -> "SqlDataFrame":
+    ) -> "DataQueryFrame":
         """
         Sorts the DataFrame based on specified column(s), similar to SQL ORDER BY clause.
 
         :param by: A string or list of strings representing column names to sort by.
         :param ascending: Optional; a boolean indicating the sort direction (True for ascending, False for descending).
-        :return: A SqlDataFrame sorted based on specified criteria.
+        :return: A DataQueryFrame sorted based on specified criteria.
         """
         if isinstance(by, str):
             by = [by]
@@ -154,19 +154,19 @@ class SqlDataFrame(pd.DataFrame):
         sorted_df = self.sort_values(by=by, ascending=ascending)
         code = f"self.sort_values(by={by}, ascending={ascending})"
         self.print_code(code)
-        return sorted_df.pipe(SqlDataFrame)
+        return sorted_df.pipe(DataQueryFrame)
 
-    def union(self, other: pd.DataFrame) -> "SqlDataFrame":
+    def union(self, other: pd.DataFrame) -> "DataQueryFrame":
         """
-        Combines the result sets of this SqlDataFrame with another, including only distinct values,
+        Combines the result sets of this DataQueryFrame with another, including only distinct values,
         similar to SQL UNION operation.
 
-        :param other: Another SqlDataFrame or pandas DataFrame to combine with.
-        :return: A SqlDataFrame containing the union of the two DataFrames.
+        :param other: Another DataQueryFrame or pandas DataFrame to combine with.
+        :return: A DataQueryFrame containing the union of the two DataFrames.
         """
         if not isinstance(other, pd.DataFrame):
             raise ValueError(
-                "The 'other' parameter must be a pandas DataFrame or an instance of SqlDataFrame."
+                "The 'other' parameter must be a pandas DataFrame or an instance of DataQueryFrame."
             )
 
         if set(self.columns) != set(other.columns):
@@ -188,4 +188,4 @@ class SqlDataFrame(pd.DataFrame):
         code = "pd.concat([self, other], ignore_index=True).drop_duplicates().reset_index(drop=True)"
         self.print_code(code)
 
-        return result.pipe(SqlDataFrame)
+        return result.pipe(DataQueryFrame)

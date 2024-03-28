@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=sqldataframe
+set SPHINXPROJ=dataqueryframe
 
 if "%1" == "" goto help
 

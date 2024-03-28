@@ -1,4 +1,4 @@
-Welcome to SQLDataFrame's documentation!
+Welcome to DataQueryFrame's documentation!
 ======================================
 
 .. toctree::

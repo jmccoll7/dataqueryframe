@@ -1,1 +1,1 @@
-"""Unit test package for sqldataframe."""
+"""Unit test package for dataqueryframe."""

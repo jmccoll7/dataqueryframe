@@ -8,13 +8,13 @@ Installation
 Stable release
 --------------
 
-To install SQLDataFrame, run this command in your terminal:
+To install DataQueryFrame, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install sqldataframe
+    $ pip install dataqueryframe
 
-This is the preferred method to install SQLDataFrame, as it will always install the most recent stable release.
+This is the preferred method to install DataQueryFrame, as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,19 +26,19 @@ you through the process.
 From sources
 ------------
 
-The sources for SQLDataFrame can be downloaded from the `Github repo`_.
+The sources for DataQueryFrame can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/jmccoll7/sqldataframe
+    $ git clone git://github.com/jmccoll7/dataqueryframe
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/jmccoll7/sqldataframe/tarball/master
+    $ curl -OJL https://github.com/jmccoll7/dataqueryframe/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/jmccoll7/sqldataframe
-.. _tarball: https://github.com/jmccoll7/sqldataframe/tarball/master
+.. _Github repo: https://github.com/jmccoll7/dataqueryframe
+.. _tarball: https://github.com/jmccoll7/dataqueryframe/tarball/master

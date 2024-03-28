@@ -2,6 +2,6 @@
 Usage
 =====
 
-To use SQLDataFrame in a project::
+To use DataQueryFrame in a project::
 
-    import sqldataframe
+    import dataqueryframe

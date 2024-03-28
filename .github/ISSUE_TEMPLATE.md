@@ -1,4 +1,4 @@
-* SQLDataFrame version:
+* DataQueryFrame version:
 * Python version:
 * Operating System:
 
